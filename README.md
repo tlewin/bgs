@@ -1,4 +1,3 @@
-BGS
-===
+# BGS - Backgammon server
 
-** TODO: Add description **
+An Elixir implementation of backgammon server.

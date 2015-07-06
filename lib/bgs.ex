@@ -1,0 +1,2 @@
+defmodule BGS do
+end

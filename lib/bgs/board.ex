@@ -1,19 +1,15 @@
 defmodule BGS.Board do
   @board_points 25
-  @initial_position {
-    # 1st quadrant
-    {2, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 5},
-    # 2nd quadrant
-    {0, 0}, {0, 3}, {0, 0}, {0, 0}, {0, 0}, {5, 0},
-    # 3rd quadrant
-    {0, 5}, {0, 0}, {0, 0}, {0, 0}, {3, 0}, {0, 0},
-    # 4th quadrant
-    {5, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 2},
-    # Bar point
-    {0, 0}
-  }
+  @initial_position :array.from_list(
+    [0, 0, 0, 0, 0, 5,
+     0, 3, 0, 0, 0, 0,
+     5, 0, 0, 0, 0, 0,
+     0, 0, 0, 0, 0, 2,
+     0]
+    )
 
-  defstruct points: @initial_position,
+  defstruct points_player1: @initial_position,
+            points_player2: @initial_position,
             bear_off_player1: 0,
             bear_off_player2: 0,
             dice: nil,
@@ -34,8 +30,8 @@ defmodule BGS.Board do
   @spec pip_count(BGS.Board) :: Tuple.t
   def pip_count(board) do
     (0..@board_points - 1) |> Enum.reduce {0, 0}, fn index, {pip1, pip2} ->
-      {p1, p2} = elem(board.points, index)
-      {pip1 + p1 * (24 - index), pip2 + p2 * (index + 1)}
+      {p1, p2} = {:array.get(index, board.points_player1), :array.get(index, board.points_player2)}
+      {pip1 + p1 * (index + 1), pip2 + p2 * (index + 1)}
     end
   end
 end
@@ -61,16 +57,15 @@ defimpl String.Chars, for: BGS.Board do
   @spec to_string(BGS.Board) :: String.t
   def to_string(board) do
     # Generate a string representation of point
-    num_points = tuple_size(board.points)
-    bar_point  = elem(board.points, num_points - 1)
+    num_points = :array.size(board.points_player1)
     points_to_string = (0..num_points - 2)
       |> Enum.map(fn index ->
-        {p1, p2} = elem(board.points, index)
+        {p1, p2} = {:array.get(index, board.points_player1), :array.get(23 - index, board.points_player2)}
         if p1 > 0, do: point_stack("O", p1), else: point_stack("X", p2)
       end)
       # Append bar point to the end of the list
-      |> Enum.concat([point_stack("O", elem(bar_point, 0)),
-                      point_stack("X", elem(bar_point, 1))])
+      |> Enum.concat([point_stack("O", :array.get(24, board.points_player1)),
+                      point_stack("X", :array.get(24, board.points_player2))])
       |> List.to_tuple
 
     board_marks = if board.clockwise do

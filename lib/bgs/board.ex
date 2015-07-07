@@ -5,7 +5,7 @@ defmodule BGS.Board do
      0, 3, 0, 0, 0, 0,
      5, 0, 0, 0, 0, 0,
      0, 0, 0, 0, 0, 2,
-     0]
+     0] # Bar point
     )
 
   defstruct points_player1: @initial_position,
@@ -15,13 +15,13 @@ defmodule BGS.Board do
             dice: nil,
             cube: 1,
             cube_owner: nil,
-            cube_offered: false,
-            clockwise: false,
+            cube_offered?: false,
+            clockwise?: false,
             match_to: 7,
             score: {0, 0},
-            crawford_rule: true,
-            crawford_match: false,
-            jaccob_rule: false,
+            crawford_rule?: true,
+            crawford_match?: false,
+            jaccob_rule?: false,
             turn: nil
 
   @typedoc """
@@ -68,7 +68,7 @@ defimpl String.Chars, for: BGS.Board do
                       point_stack("X", :array.get(24, board.points_player2))])
       |> List.to_tuple
 
-    board_marks = if board.clockwise do
+    board_marks = if board.clockwise? do
       ["+24-23-22-21-20-19------18-17-16-15-14-13-+",
         "+-1--2--3--4--5--6-------7--8--9-10-11-12-+"]
     else
@@ -77,14 +77,14 @@ defimpl String.Chars, for: BGS.Board do
     end
 
     # Top
-    points_iterator = if board.clockwise, do: (23..12), else: (12..23)
+    points_iterator = if board.clockwise?, do: (23..12), else: (12..23)
     top_board = board_half(points_to_string, points_iterator, 0..4, 24)
 
     # Middle
     middle_board = ["|                  |BAR|                  |"]
 
     # Bottom
-    points_iterator = if board.clockwise, do: (0..11), else: (11..0)
+    points_iterator = if board.clockwise?, do: (0..11), else: (11..0)
     bottom_board = board_half(points_to_string, points_iterator, 4..0, 25)
 
     board_marks

@@ -8,12 +8,16 @@ defmodule Play do
   def move(board, play) do
   end
 
-  def possible_moves(board, play) do
+  def possible_moves(board, player) do
     cond do
-      can_double? ->
+      board.turn != player ->
+        []
+      can_double?(board, player) ->
         [{:double}, {:roll}]
       board.cube_offered? ->
         [{:take}, [:drop]]
+      !is_nil(board.dice) ->
+        points = player_points(board, player)
     end
   end
 
@@ -30,7 +34,7 @@ defmodule Play do
   def can_bear_off?(board, player) do
     points = player_points(board, player)
 
-    (for index <- (5..24), do: :array.get(index, points))
+    (for index <- (5..24), do: points[index])
     |> Enum.sum == 0
   end
 

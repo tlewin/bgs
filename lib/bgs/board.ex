@@ -1,15 +1,8 @@
 defmodule BGS.Board do
-  @board_points 25
-  @initial_position :array.from_list(
-    [0, 0, 0, 0, 0, 5,
-     0, 3, 0, 0, 0, 0,
-     5, 0, 0, 0, 0, 0,
-     0, 0, 0, 0, 0, 2,
-     0] # Bar point
-    )
+  alias BGS.Points
 
-  defstruct points_player1: @initial_position,
-            points_player2: @initial_position,
+  defstruct points_player1: Points.new(),
+            points_player2: Points.new(),
             bear_off_player1: 0,
             bear_off_player2: 0,
             dice: nil,
@@ -30,7 +23,7 @@ defmodule BGS.Board do
   @spec pip_count(BGS.Board) :: Tuple.t
   def pip_count(board) do
     (0..@board_points - 1) |> Enum.reduce {0, 0}, fn index, {pip1, pip2} ->
-      {p1, p2} = {:array.get(index, board.points_player1), :array.get(index, board.points_player2)}
+      {p1, p2} = {board.points_player1[index], board.points_player2[index]}
       {pip1 + p1 * (index + 1), pip2 + p2 * (index + 1)}
     end
   end
@@ -54,18 +47,21 @@ defimpl String.Chars, for: BGS.Board do
       | O           X    |   | X              O |     0 points
       +12-11-10--9--8--7-------6--5--4--3--2--1-+     X: player2
   """
+
+  alias BGS.Points
+
   @spec to_string(BGS.Board) :: String.t
   def to_string(board) do
     # Generate a string representation of point
-    num_points = :array.size(board.points_player1)
+    num_points = Points.size(board.points_player1)
     points_to_string = (0..num_points - 2)
       |> Enum.map(fn index ->
-        {p1, p2} = {:array.get(index, board.points_player1), :array.get(23 - index, board.points_player2)}
+        {p1, p2} = {board.points_player1[index], board.points_player2[23 - index]}
         if p1 > 0, do: point_stack("O", p1), else: point_stack("X", p2)
       end)
       # Append bar point to the end of the list
-      |> Enum.concat([point_stack("O", :array.get(24, board.points_player1)),
-                      point_stack("X", :array.get(24, board.points_player2))])
+      |> Enum.concat([point_stack("O", board.points_player1[:bar]),
+                      point_stack("X", board.points_player2[:bar])])
       |> List.to_tuple
 
     board_marks = if board.clockwise? do

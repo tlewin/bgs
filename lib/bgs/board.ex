@@ -17,20 +17,21 @@ defmodule BGS.Board do
             jaccob_rule?: false,
             turn: nil
 
-  @typedoc """
+  @doc """
   Compute the pip count for each player
   """
-  @spec pip_count(BGS.Board) :: Tuple.t
-  def pip_count(board) do
-    (0..@board_points - 1) |> Enum.reduce {0, 0}, fn index, {pip1, pip2} ->
-      {p1, p2} = {board.points_player1[index], board.points_player2[index]}
-      {pip1 + p1 * (index + 1), pip2 + p2 * (index + 1)}
-    end
+  @spec pip_count(BGS.Board) :: {non_neg_integer, non_neg_integer}
+  def pip_count(%BGS.Board{points_player1: points_p1, points_player2: points_p2}) do
+    Enum.zip(points_p1, points_p2)
+    |> Enum.reduce({1, {0, 0}}, fn {p1, p2}, {index, {pip1, pip2}} ->
+      {index + 1, {pip1 + p1 * index, pip2 + p2 * index}}
+    end)
+    |> elem 1
   end
 end
 
 defimpl String.Chars, for: BGS.Board do
-  @typedoc """
+  @doc """
   Convert board to string format:
 
       +13-14-15-16-17-18------19-20-21-22-23-24-+     O: player1
@@ -104,7 +105,7 @@ defimpl String.Chars, for: BGS.Board do
     end
   end
 
-  @spec board_half(Tuple.t, Range.t, Range.t, Integer.t) :: List.t
+  @spec board_half(BGS.Points.t, Range.t, Range.t, Integer.t) :: List.t
   defp board_half(points, points_iterator, stack_iterator, bar_point) do
     stack_iterator |> Enum.map fn index ->
       (points_iterator |> Enum.reduce "|", fn point, acc ->

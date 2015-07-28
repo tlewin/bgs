@@ -1,17 +1,21 @@
 defmodule BGS.Board do
   alias BGS.Points
 
+  @type t :: %__MODULE__ {
+            }
+
   defstruct points_player1: Points.new(),
             points_player2: Points.new(),
             bear_off_player1: 0,
             bear_off_player2: 0,
-            dice: nil,
+            dices: nil,
             cube: 1,
             cube_owner: nil,
             cube_offered?: false,
             clockwise?: false,
             match_to: 7,
-            score: {0, 0},
+            score_player1: 0,
+            score_player2: 0,
             crawford_rule?: true,
             crawford_match?: false,
             jaccob_rule?: false,
